@@ -4,7 +4,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
-import { DailyCheckin } from "./pages/DailyCheckin";
+import { DailyCheckin } from "./pages/DailyCheckIn";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -40,6 +40,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+
     </Routes>
   );
 }
