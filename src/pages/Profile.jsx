@@ -13,6 +13,7 @@ const Profile = () => {
   const [avatar, setAvatar] = useState(profile?.avatar || "");
   const [isProfileComplete, setIsProfileComplete] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const unlockedBadgesRef = useRef([]);
 
   useEffect(() => {
     if (!loading) {
@@ -31,6 +32,20 @@ const Profile = () => {
       }
 
       setAvatar(profile?.avatar || "");
+
+      // Check for newly unlocked badges
+      const newlyUnlocked = allBadges.filter(
+        (b) =>
+          b.condition(profile) && !unlockedBadgesRef.current.includes(b.id)
+      );
+
+      newlyUnlocked.forEach((badge) => {
+        toast.success(`🎉 You unlocked "${badge.name}"!`);
+      });
+
+      unlockedBadgesRef.current = allBadges
+        .filter((b) => b.condition(profile))
+        .map((b) => b.id);
     }
   }, [loading, profile]);
 
@@ -80,7 +95,7 @@ const Profile = () => {
               className="w-32 h-32 rounded-full overflow-hidden border-4 border-emerald-500 cursor-pointer"
             >
               <img
-                src={avatar || "https://picsum.photos/200"}
+                src={avatar || "/avatar.png"}
                 alt="avatar"
                 className="w-full h-full object-cover"
               />
@@ -94,9 +109,26 @@ const Profile = () => {
               onChange={handleFileChange}
             />
 
-            <h2 className="mt-6 text-2xl font-bold">
-              {profile?.name || "Complete your profile"}
-            </h2>
+            <div className="mt-6 flex items-center gap-2">
+              <h2 className="text-2xl font-bold">
+                {profile?.name || "Complete your profile"}
+              </h2>
+              <button
+                onClick={() => setModalOpen(true)}
+                className="text-slate-400 hover:text-emerald-600 p-1 rounded-full hover:bg-slate-100"
+                title="Edit profile"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#000000"
+                >
+                  <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
+                </svg>
+              </button>
+            </div>
 
             {!isProfileComplete && (
               <button
@@ -115,7 +147,7 @@ const Profile = () => {
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {/* ... same as before, use isProfileComplete */}
+            {/* You can add stats here */}
           </div>
 
           {/* Impact Heatmap */}
@@ -127,27 +159,46 @@ const Profile = () => {
               Achievements
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
-              {isProfileComplete ? (
-                allBadges.map((badge) => (
+              {allBadges.map((badge) => {
+                const unlocked = badge.condition(profile);
+                let progress = 0;
+
+                if (badge.id === "co2_100") {
+                  const co2Saved = Object.values(profile?.heatmapCo2 || {}).reduce(
+                    (sum, v) => sum + v,
+                    0
+                  );
+                  progress = Math.min((co2Saved / 100) * 100, 100);
+                }
+
+                return (
                   <div
                     key={badge.id}
-                    className="flex flex-col items-center gap-2"
+                    className={`flex flex-col items-center gap-2 ${
+                      unlocked ? "" : "opacity-30"
+                    }`}
                   >
                     <div
-                      className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${badge.color}`}
+                      className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${
+                        unlocked ? badge.color : "bg-slate-200"
+                      }`}
                     >
                       {badge.icon}
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 text-center uppercase tracking-wider">
                       {badge.name}
                     </span>
+                    {!unlocked && badge.id === "co2_100" && (
+                      <div className="w-full h-1 bg-slate-200 rounded mt-1">
+                        <div
+                          className="h-1 bg-emerald-500 rounded"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
-                ))
-              ) : (
-                <p className="text-slate-400 col-span-full text-center">
-                  Complete your profile to see your achievements
-                </p>
-              )}
+                );
+              })}
             </div>
           </div>
         </div>

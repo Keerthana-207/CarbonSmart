@@ -7,13 +7,16 @@ import { useFirebase } from "../context/Firebase";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { profile, loading } = useFirebase();
+  const { profile, loading, updateProfile, user } = useFirebase();
 
   const [challengeAccepted, setChallengeAccepted] = useState(false);
   const [miniHeatmapData, setMiniHeatmapData] = useState([]);
   const [streak, setStreak] = useState(0);
   const [dailyScore, setDailyScore] = useState(0);
   const [recentBadge, setRecentBadge] = useState(null);
+
+  const todayKey = new Date().toDateString();
+  const alreadyCheckedInToday = (profile?.heatmap?.[todayKey] ?? 0) > 0;
 
   useEffect(() => {
     if (!loading && profile) {
@@ -34,11 +37,30 @@ const Dashboard = () => {
 
       setMiniHeatmapData(heatmapData.reverse());
 
-      // STREAK
-      setStreak(profile.streak ?? 0);
+      // STREAK calculation based on consecutive days with activity
+      const allKeys = Object.keys(profile.heatmap || {}).sort(
+        (a, b) => new Date(a) - new Date(b)
+      );
+
+      let currentStreak = 0;
+      let lastDate = null;
+
+      allKeys.forEach((key) => {
+        if ((profile.heatmap[key] ?? 0) > 0) {
+          const date = new Date(key);
+          if (!lastDate || (date - lastDate === 86400000)) {
+            currentStreak++;
+          } else {
+            currentStreak = 1;
+          }
+          lastDate = date;
+        }
+      });
+
+      setStreak(currentStreak);
 
       // DAILY SCORE
-      const todayLevel = profile.heatmap?.[today.toDateString()] ?? 0;
+      const todayLevel = profile.heatmap?.[todayKey] ?? 0;
       setDailyScore(Math.min(todayLevel * 20, 100));
 
       // RECENT BADGE
@@ -54,6 +76,24 @@ const Dashboard = () => {
   }, [loading, profile]);
 
   if (loading) return null;
+
+  const handleDailyCheckIn = async () => {
+    if (!alreadyCheckedInToday) {
+      const updatedHeatmap = {
+        ...profile.heatmap,
+        [todayKey]: 1 // example level
+      };
+      const updatedCo2 = {
+        ...profile.heatmapCo2,
+        [todayKey]: 2.5 // example CO2 saved
+      };
+
+      await updateProfile(user.uid, {
+        heatmap: updatedHeatmap,
+        heatmapCo2: updatedCo2
+      });
+    }
+  };
 
   const greenChallenge = {
     text: "Avoid single-use plastic containers for your lunch today."
@@ -75,12 +115,13 @@ const Dashboard = () => {
 
             {/* MAIN CTA: Start Check-In */}
             <button
-              onClick={() => navigate("/daily-checkin")}
-              className="group w-full rounded-3xl p-8 sm:p-10 text-left
-                bg-gradient-to-br from-emerald-600 via-teal-500 to-emerald-700
+              disabled={alreadyCheckedInToday}
+              onClick={handleDailyCheckIn}
+              className={`group w-full rounded-3xl p-8 sm:p-10 text-left
+                ${alreadyCheckedInToday ? "bg-slate-300 cursor-not-allowed" : 'bg-gradient-to-br from-emerald-600 via-teal-500 to-emerald-700'}
                 relative overflow-hidden shadow-xl shadow-emerald-200/50
                 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-300/50
-                active:scale-[0.99]"
+                active:scale-[0.99]`}
             >
               <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-colors" />
               <div className="relative z-10 flex flex-col gap-5">
@@ -97,7 +138,7 @@ const Dashboard = () => {
                 </p>
                 <div className="flex items-center gap-3 text-base font-bold text-white mt-4">
                   <span className="bg-white text-emerald-700 px-6 py-2.5 rounded-full shadow-lg group-hover:translate-x-1 transition-transform">
-                    Start Check-In →
+                    {alreadyCheckedInToday ? "Today's Check-In Completed ✓" : "Start Check-In →"}
                   </span>
                 </div>
               </div>

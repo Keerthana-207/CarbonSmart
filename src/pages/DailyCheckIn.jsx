@@ -114,24 +114,68 @@ export const DailyCheckin = () => {
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
 
+  
+  const isSameDay = React.useCallback((d1, d2) => {
+    if (!d1 || !d2) return false;
+    return new Date(d1).toDateString() === new Date(d2).toDateString();
+  }, []);
+
   // --- Save to Firebase ---
-  const handleSave = async () => {
+const handleSave = async () => {
   if (!profile || !user) return;
 
-  const todayKey = new Date().toDateString();
-  const updatedHeatmap = { ...profile.heatmap, [todayKey]: Math.round((100 - ecoScore) / 20) };
+  const today = new Date();
+  const todayKey = today.toDateString();
+
+  const alreadyCheckedInToday = isSameDay(
+    profile.lastCheckin,
+    today
+  );
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const checkedInYesterday = isSameDay(profile.lastCheckin, yesterday);
+
+  const newStreak = alreadyCheckedInToday
+    ? profile.streak
+    : checkedInYesterday
+      ? (profile.streak || 0) + 1
+      : 1;
+
+  const previousLevel = profile.heatmap?.[todayKey] ?? Infinity;
+  const newLevel = Math.min(
+  5,
+  Math.max(0, Math.round((100 - ecoScore) / 20))
+);
+
+  const updatedHeatmap = {
+    ...profile.heatmap,
+    [todayKey]: Math.min(previousLevel, newLevel)
+  };
+
   const updatedProfile = {
     ...profile,
     heatmap: updatedHeatmap,
-    streak: (profile.streak || 0) + 1,
-    lastCheckin: new Date().toISOString()
+    lastCheckin: today.toISOString(),
+    streak: newStreak
   };
 
-  // Pass the actual user UID
   await updateProfile(user.uid, updatedProfile);
-  navigate('/dashboard');
+  navigate("/dashboard");
 };
 
+  useEffect(() => {
+    if (!loading && profile?.lastCheckin) {
+      const alreadyCheckedIn =
+        new Date(profile.lastCheckin).toDateString() ===
+        new Date().toDateString();
+
+      if (alreadyCheckedIn) {
+        navigate("/dashboard");
+      }
+    }
+  }, [loading, profile, navigate]);
 
   if (loading) return null;
 

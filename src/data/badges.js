@@ -1,8 +1,32 @@
 export const badges = [
-  { id: 1, name: "Zero Waste", icon: "♻️", color: "bg-blue-100 text-blue-600" },
-  { id: 2, name: "Solar King", icon: "☀️", color: "bg-amber-100 text-amber-600" },
-  { id: 3, name: "Biker Pro", icon: "🚴", color: "bg-emerald-100 text-emerald-600" },
-  { id: 4, name: "Plant Guru", icon: "🌱", color: "bg-green-100 text-green-600" },
-  { id: 5, name: "Impact Hero", icon: "🌍", color: "bg-purple-100 text-purple-600" },
-  { id: 6, name: "Offsetter", icon: "🪴", color: "bg-rose-100 text-rose-600" },
+  {
+    id: "first_checkin",
+    name: "First Step",
+    icon: "🌱",
+    color: "bg-emerald-100",
+    condition: (profile) => Object.keys(profile?.heatmap || {}).length >= 1
+  },
+  {
+    id: "streak_7",
+    name: "7-Day Streak",
+    icon: "🔥",
+    color: "bg-orange-200",
+    condition: (profile) => profile?.streak >= 7
+  },
+  {
+    id: "streak_30",
+    name: "30-Day Streak",
+    icon: "🏆",
+    color: "bg-yellow-200",
+    condition: (profile) => profile?.streak >= 30
+  },
+  {
+    id: "co2_100",
+    name: "100kg Saved",
+    icon: "🌍",
+    color: "bg-blue-200",
+    condition: (profile) =>
+      Object.values(profile?.heatmapCo2 || {}).reduce((s, v) => s + v, 0) >= 100
+  }
 ];
+
