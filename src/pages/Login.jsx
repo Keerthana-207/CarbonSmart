@@ -105,16 +105,25 @@ const Login = () => {
             </button>
           </form>
 
-          <button
+          {/* <button
             type="button"
-            onClick={signupWithGoogle}
+            onClick={async () => {
+              try {
+                await signupWithGoogle();
+                // redirect handled by useEffect
+              } catch (err) {
+                console.error("Google Sign-In Error:", err);
+                alert(err.message);
+              }
+            }}
             className="mt-4 w-full rounded-xl px-4 py-3 font-semibold bg-white"
           >
+
             <div className="flex gap-4 justify-center items-center">
               <FcGoogle className="text-2xl" />
               <span className="text-sm">Continue with Google</span>
             </div>
-          </button>
+          </button> */}
 
           <p className="mt-6 text-center text-sm text-white/80">
             Don’t have an account?{" "}

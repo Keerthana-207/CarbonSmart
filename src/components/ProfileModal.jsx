@@ -23,7 +23,7 @@ export const ProfileModal = ({ open, onClose, onSave, profile }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl w-96 p-6 relative">
-        <h2 className="text-lg font-bold mb-4">Complete Your Profile</h2>
+        <h2 className="text-lg font-bold mb-4 text-black">Complete Your Profile</h2>
         <div className="flex flex-col gap-4">
           <input
             type="text"
@@ -31,7 +31,7 @@ export const ProfileModal = ({ open, onClose, onSave, profile }) => {
             placeholder="Full Name"
             value={formData.name}
             onChange={handleChange}
-            className="border border-slate-300 rounded px-3 py-2"
+            className="border border-slate-500 rounded px-3 py-2"
           />
           <input
             type="text"
@@ -39,7 +39,7 @@ export const ProfileModal = ({ open, onClose, onSave, profile }) => {
             placeholder="Location"
             value={formData.location}
             onChange={handleChange}
-            className="border border-slate-300 rounded px-3 py-2"
+            className="border border-slate-500 rounded px-3 py-2"
           />
           <input
             type="text"
@@ -47,14 +47,14 @@ export const ProfileModal = ({ open, onClose, onSave, profile }) => {
             placeholder="Avatar URL"
             value={formData.avatar}
             onChange={handleChange}
-            className="border border-slate-300 rounded px-3 py-2"
+            className="border border-slate-500 rounded px-3 py-2"
           />
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded bg-slate-200 hover:bg-slate-300"
+            className="px-4 py-2 rounded bg-slate-200 hover:bg-slate-300 text-black"
           >
             Cancel
           </button>

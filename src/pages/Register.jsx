@@ -149,7 +149,7 @@ const Register = () => {
             </button>
           </form>
 
-          <button
+          {/* <button
             type="button"
             onClick={async () => {
               try {
@@ -172,7 +172,7 @@ const Register = () => {
               <FcGoogle className="text-2xl" />
               <span className="text-sm">Continue with Google</span>
             </div>
-          </button>
+          </button> */}
 
 
           {/* Footer */}
