@@ -151,7 +151,10 @@ export const FirebaseProvider = ({ children }) => {
      AUTH + PROFILE LISTENER
   ----------------------------------- */
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (authUser) => {
+    const unsubAuth = 
+    onAuthStateChanged(auth, (authUser) => {
+      setLoading(true);
+
       if (!authUser) {
         setUser(null);
         setProfile(null);
@@ -159,18 +162,24 @@ export const FirebaseProvider = ({ children }) => {
         return;
       }
 
+      // 🔥 HARD RESET before loading new profile
+      setProfile(null);
       setUser(authUser);
 
       const userRef = ref(database, `users/${authUser.uid}`);
+
       const unsubProfile = onValue(userRef, (snapshot) => {
         if (snapshot.exists()) {
           setProfile(snapshot.val());
+        } else {
+          setProfile(null);
         }
         setLoading(false);
       });
 
       return () => unsubProfile();
     });
+
 
     return () => unsubAuth();
   }, []);

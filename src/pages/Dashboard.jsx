@@ -75,7 +75,8 @@ const Dashboard = () => {
     }
   }, [loading, profile]);
 
-  if (loading) return null;
+  if (loading || !profile || !user) return null;
+
 
   const handleDailyCheckIn = async () => {
     if (!alreadyCheckedInToday) {
